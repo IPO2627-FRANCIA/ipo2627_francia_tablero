@@ -1,0 +1,196 @@
+/* ==========================================================================
+   Ajustes: formulario lateral con grupos de controles
+   Cada grupo (fieldset) se separa más del siguiente que sus controles
+   entre sí: proximidad (Gestalt).
+   ========================================================================== */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.settings__title {
+  font-size: var(--text-lead);
+}
+
+.settings__note {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+.settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings__legend {
+  padding: 0;
+  margin-block-end: var(--space-3);
+  color: var(--color-text-subtle);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+/* Selector de dimensión: − [ N ] + */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepper__input {
+  width: 3.5rem;
+  height: var(--control-height);
+  border: 0;
+  border-radius: var(--radius-m);
+  background: var(--color-slot);
+  font-family: var(--font-display);
+  font-size: var(--text-lead);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+  appearance: textfield;
+}
+
+.stepper__input::-webkit-inner-spin-button,
+.stepper__input::-webkit-outer-spin-button {
+  appearance: none;
+}
+
+.stepper__preview {
+  margin-inline-start: auto;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.stepper .button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Control segmentado: radios en una píldora (composición unidimensional) */
+.segmented {
+  display: flex;
+  padding: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--color-slot);
+}
+
+.segmented__option {
+  position: relative;
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+/* El radio real cubre la opción (absolute) pero es invisible:
+   sigue siendo accesible por teclado y lector de pantalla */
+.segmented__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented__option:hover {
+  color: var(--color-text);
+}
+
+.segmented__option:has(:checked) {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  box-shadow: var(--shadow-1);
+}
+
+.segmented__option:has(:focus-visible) {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+
+/* Tarjetas de opción (forma y color): retícula bidimensional */
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.option-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.option-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-m);
+  background: var(--color-slot);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.option-card__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.option-card__preview {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.option-card__preview .piece {
+  width: 1.25rem;
+}
+
+.option-card__label {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  text-align: center;
+}
+
+.option-card:hover {
+  background: var(--color-slot-hover);
+}
+
+.option-card:has(:checked) {
+  background: var(--color-accent-soft);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.option-card:has(:checked) .option-card__label {
+  color: var(--color-text);
+}
+
+.option-card:has(:focus-visible) {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}

@@ -1,0 +1,211 @@
+/* ==========================================================================
+   Tablero: panel, retícula NxN, celdas, marcadores de fila y pantalla final
+   ========================================================================== */
+
+/* Panel: contenedor de consulta para que el tablero se adapte a su ancho,
+   y contenedor de referencia (relative) para la pantalla final */
+.board-panel {
+  position: relative;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.board-panel__instructions {
+  max-width: 46ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  text-align: center;
+}
+
+/* Contenedor de referencia (relative) para los marcadores de fila,
+   que se posicionan de forma absoluta a su derecha */
+.board {
+  --board-gap: var(--space-2);
+  --badge-size: 2.75rem;
+  --tile: var(--tile-m);
+  --cell: min(
+    var(--tile),
+    (100cqi - var(--badge-size) - var(--space-3) - (var(--n) - 1) * var(--board-gap)) / var(--n)
+  );
+
+  position: relative;
+  padding-inline-end: calc(var(--badge-size) + var(--space-3));
+}
+
+.board[data-tile-size="small"] { --tile: var(--tile-s); }
+.board[data-tile-size="medium"] { --tile: var(--tile-m); }
+.board[data-tile-size="large"] { --tile: var(--tile-l); }
+
+/* Retícula bidimensional: N columnas × N filas de tamaño fijo */
+.board__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: var(--board-gap);
+}
+
+/* Las filas existen para la accesibilidad (role="row"), no para el layout */
+.board__row {
+  display: contents;
+}
+
+/* Celda */
+.cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-m);
+  background: var(--color-slot);
+  cursor: grab;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out);
+}
+
+.cell:hover {
+  background: var(--color-slot-hover);
+}
+
+.cell:hover .piece {
+  transform: scale(1.06);
+}
+
+.cell:active {
+  cursor: grabbing;
+}
+
+.cell[data-row-complete] {
+  background: var(--color-success-soft);
+}
+
+.cell[aria-selected="true"] {
+  background: var(--color-accent-soft);
+  outline: var(--focus-width) solid var(--color-accent);
+  outline-offset: calc(-1 * var(--focus-width));
+}
+
+.cell[aria-selected="true"] .piece {
+  transform: translateY(-3px) scale(1.08);
+}
+
+.cell[data-dragging] {
+  opacity: 0.35;
+}
+
+.cell[data-drop-target] {
+  background: var(--color-accent-soft);
+  outline: 2px dashed var(--color-accent);
+  outline-offset: -2px;
+}
+
+.cell[data-moving] {
+  z-index: 1;
+}
+
+.cell[data-invalid] {
+  animation: cell-shake 320ms var(--ease-out);
+}
+
+/* Pista: anillo posicionado alrededor de la celda, fuera de su caja */
+.cell[data-hint]::after {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--space-1));
+  border: 2px solid var(--color-accent);
+  border-radius: calc(var(--radius-m) + var(--space-1));
+  pointer-events: none;
+  animation: hint-pulse 1.2s var(--ease-out) infinite;
+}
+
+.board[data-locked] .cell {
+  cursor: default;
+}
+
+@keyframes cell-shake {
+  25% { translate: -4px 0; }
+  50% { translate: 4px 0; }
+  75% { translate: -2px 0; }
+}
+
+@keyframes hint-pulse {
+  50% { opacity: 0.35; scale: 1.04; }
+}
+
+/* Marcadores de fila: columna posicionada a la derecha de la retícula y
+   alineada fila a fila con ella (continuidad) */
+.board__rows {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: grid;
+  grid-auto-rows: var(--cell);
+  gap: var(--board-gap);
+  width: var(--badge-size);
+  padding: 0;
+  list-style: none;
+}
+
+.board__badge {
+  place-self: center;
+  min-width: 2.25rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-slot);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  transition: background-color var(--duration-base) var(--ease-out);
+}
+
+.board__badge[data-complete] {
+  background: var(--color-success);
+  color: var(--color-on-accent);
+}
+
+/* Pantalla final: capa absoluta sobre todo el panel del tablero */
+.board__win {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-l);
+  background: var(--color-scrim);
+  backdrop-filter: blur(6px);
+  text-align: center;
+  animation: win-in var(--duration-base) var(--ease-out);
+}
+
+.board__win[hidden] {
+  display: none;
+}
+
+.board__win-eyebrow {
+  color: var(--color-success);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+.board__win-title {
+  font-size: var(--text-display);
+}
+
+.board__win-text {
+  margin-block-end: var(--space-3);
+  color: var(--color-text-muted);
+}
+
+@keyframes win-in {
+  from { opacity: 0; scale: 0.96; }
+}

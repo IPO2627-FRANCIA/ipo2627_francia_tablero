@@ -1,0 +1,16 @@
+/* ==========================================================================
+   Card: superficie elevada que agrupa contenido (región común, Gestalt)
+   ========================================================================== */
+
+.card {
+  padding: var(--space-6);
+  border-radius: var(--radius-l);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+@media (max-width: 40rem) {
+  .card {
+    padding: var(--space-5) var(--space-4);
+  }
+}

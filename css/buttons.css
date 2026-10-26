@@ -1,0 +1,60 @@
+/* ==========================================================================
+   Botones: una sola forma (píldora) con tonos que solo cambian el color
+   ========================================================================== */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding-inline: var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.button__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Tono principal: única acción destacada por pantalla */
+.button--primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.button--primary:hover {
+  background: var(--color-accent-hover);
+}
+
+/* Tono neutro: acciones secundarias, visualmente más calladas */
+.button--neutral {
+  background: var(--color-slot);
+  color: var(--color-text);
+}
+
+.button--neutral:hover {
+  background: var(--color-slot-hover);
+}
+
+/* Variante solo icono: mismo alto, forma circular */
+.button--icon {
+  width: var(--control-height);
+  padding: 0;
+}

@@ -1,0 +1,76 @@
+/* ==========================================================================
+   Cabecera: marca, marcadores de la partida y acciones
+   Fija (sticky) para que el estado y las acciones estén siempre a la vista.
+   ========================================================================== */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-bg-translucent);
+  backdrop-filter: blur(12px);
+}
+
+.app-header__title {
+  font-size: var(--text-title);
+}
+
+.app-header__subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+.app-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Marcadores */
+.stats {
+  display: flex;
+  gap: var(--space-5);
+  margin-inline-start: auto;
+}
+
+.stats__item {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.stats__label {
+  color: var(--color-text-subtle);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+.stats__value {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-tight);
+}
+
+/* En pantallas estrechas la cabecera ocupa demasiado alto para ir fija */
+@media (max-width: 60rem) {
+  .app-header {
+    position: static;
+    padding-inline: var(--space-4);
+  }
+
+  .stats {
+    margin-inline-start: 0;
+  }
+
+  .app-header__actions {
+    width: 100%;
+  }
+}

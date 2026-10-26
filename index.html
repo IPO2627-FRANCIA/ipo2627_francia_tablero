@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es" data-palette="warm">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tablero · Ordena las filas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2312151d'/%3E%3Ccircle cx='10' cy='10' r='5' fill='%23f2846e'/%3E%3Crect x='17' y='5' width='10' height='10' rx='2' fill='%2357c27a'/%3E%3Cpath d='M16 18l6 10H10z' fill='%238f9cf7'/%3E%3C/svg%3E">
+  <meta name="description" content="Juego de fichas: intercambia fichas hasta que cada fila del tablero contenga fichas del mismo tipo.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/card.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/tooltip.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/piece.css">
+  <link rel="stylesheet" href="css/board.css">
+  <link rel="stylesheet" href="css/settings.css">
+  <link rel="stylesheet" href="css/dialog.css">
+  <link rel="stylesheet" href="css/toast.css">
+
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header__brand">
+      <h1 class="app-header__title">Tablero</h1>
+      <p class="app-header__subtitle">Deja cada fila con fichas iguales</p>
+    </div>
+
+    <dl class="stats">
+      <div class="stats__item">
+        <dt class="stats__label">Movimientos</dt>
+        <dd class="stats__value"><output data-stat="moves">0</output></dd>
+      </div>
+      <div class="stats__item">
+        <dt class="stats__label">Filas completas</dt>
+        <dd class="stats__value"><output data-stat="rows">0/0</output></dd>
+      </div>
+    </dl>
+
+    <nav class="app-header__actions" aria-label="Acciones de la partida">
+      <button class="button button--neutral" type="button" data-action="hint" data-tooltip="Resalta un intercambio útil">
+        <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+        Pista
+      </button>
+      <button class="button button--neutral" type="button" data-action="help" data-tooltip="Reglas y controles">
+        <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>
+        Cómo se juega
+      </button>
+      <button class="button button--primary" type="button" data-action="new-game">
+        <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8M21 3v5h-5"/></svg>
+        Nuevo tablero
+      </button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="board-panel card" aria-labelledby="board-title">
+      <h2 class="visually-hidden" id="board-title">Tablero de juego</h2>
+
+      <div class="board" data-board-wrapper>
+        <div class="board__grid" role="grid" aria-labelledby="board-title" aria-describedby="board-instructions" data-board></div>
+        <ol class="board__rows" aria-hidden="true" data-row-status></ol>
+      </div>
+
+      <p class="board-panel__instructions" id="board-instructions">
+        Arrastra una ficha sobre otra para intercambiarlas, o selecciona dos con clic, Intro o Espacio. Muévete con las flechas.
+      </p>
+
+      <div class="board__win" hidden data-win>
+        <p class="board__win-eyebrow">Tablero completado</p>
+        <h3 class="board__win-title">¡Todas las filas en orden!</h3>
+        <p class="board__win-text">Lo has resuelto en <strong data-win-moves>0 movimientos</strong>.</p>
+        <button class="button button--primary" type="button" data-action="new-game">Jugar otra vez</button>
+      </div>
+    </section>
+
+    <aside class="settings card" aria-labelledby="settings-title">
+      <header class="settings__header">
+        <h2 class="settings__title" id="settings-title">Ajustes</h2>
+        <p class="settings__note">Cualquier cambio crea un tablero nuevo.</p>
+      </header>
+
+      <form class="settings__form" data-settings>
+        <fieldset class="settings__group">
+          <legend class="settings__legend">Dimensión</legend>
+          <div class="stepper">
+            <button class="button button--neutral button--icon" type="button" aria-label="Reducir dimensión" data-step="-1" data-tooltip="Una fila menos">
+              <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+            </button>
+            <label class="visually-hidden" for="dimension">Número de filas y columnas</label>
+            <input class="stepper__input" id="dimension" name="dimension" type="number" min="3" max="8" step="1" inputmode="numeric" value="4">
+            <button class="button button--neutral button--icon" type="button" aria-label="Aumentar dimensión" data-step="1" data-tooltip="Una fila más">
+              <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <output class="stepper__preview" for="dimension" data-dimension-preview>4 × 4</output>
+          </div>
+        </fieldset>
+
+        <fieldset class="settings__group">
+          <legend class="settings__legend">Tamaño de las fichas</legend>
+          <div class="segmented">
+            <label class="segmented__option"><input class="segmented__input" type="radio" name="tileSize" value="small">Pequeña</label>
+            <label class="segmented__option"><input class="segmented__input" type="radio" name="tileSize" value="medium">Mediana</label>
+            <label class="segmented__option"><input class="segmented__input" type="radio" name="tileSize" value="large">Grande</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="settings__group">
+          <legend class="settings__legend">Forma</legend>
+          <div class="option-grid" data-options="shapeSet"></div>
+        </fieldset>
+
+        <fieldset class="settings__group">
+          <legend class="settings__legend">Color</legend>
+          <div class="option-grid option-grid--three" data-options="palette"></div>
+        </fieldset>
+      </form>
+    </aside>
+  </main>
+
+  <template data-template="theme-option">
+    <label class="option-card">
+      <input class="option-card__input" type="radio">
+      <span class="option-card__preview" data-preview></span>
+      <span class="option-card__label" data-label></span>
+    </label>
+  </template>
+
+  <dialog class="dialog" aria-labelledby="help-title" data-dialog="help">
+    <header class="dialog__header">
+      <h2 class="dialog__title" id="help-title">Cómo se juega</h2>
+      <form method="dialog">
+        <button class="button button--neutral button--icon" aria-label="Cerrar ayuda">
+          <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </form>
+    </header>
+
+    <div class="dialog__body">
+      <section class="dialog__section dialog__section--example">
+        <h3 class="dialog__subtitle">Objetivo</h3>
+        <p>Consigue que <strong>cada fila</strong> del tablero tenga fichas de un solo tipo. Hay tres tipos, cada uno con su forma y su color.</p>
+        <div class="dialog__example" aria-hidden="true" data-help-example>
+          <span class="piece" data-shape="circle" data-type="0"></span><span class="piece" data-shape="circle" data-type="0"></span><span class="piece" data-shape="circle" data-type="0"></span>
+          <span class="piece" data-shape="square" data-type="1"></span><span class="piece" data-shape="square" data-type="1"></span><span class="piece" data-shape="square" data-type="1"></span>
+          <span class="piece" data-shape="triangle" data-type="2"></span><span class="piece" data-shape="triangle" data-type="2"></span><span class="piece" data-shape="triangle" data-type="2"></span>
+        </div>
+      </section>
+
+      <section class="dialog__section">
+        <h3 class="dialog__subtitle">Mover fichas</h3>
+        <ul class="dialog__list">
+          <li><strong>Arrastra</strong> una ficha y suéltala sobre otra para intercambiarlas.</li>
+          <li>O <strong>selecciona</strong> dos fichas con clic, <kbd>Intro</kbd> o <kbd>Espacio</kbd>.</li>
+          <li>Muévete por el tablero con las <kbd>flechas</kbd>; <kbd>Esc</kbd> cancela la selección.</li>
+        </ul>
+      </section>
+
+      <section class="dialog__section">
+        <h3 class="dialog__subtitle">Ayudas</h3>
+        <ul class="dialog__list">
+          <li>El marcador junto a cada fila indica cuántas fichas iguales tiene; muestra ✓ cuando está completa.</li>
+          <li><strong>Pista</strong> resalta un intercambio que te acerca a la solución.</li>
+          <li>Todos los tableros tienen solución.</li>
+        </ul>
+      </section>
+
+      <section class="dialog__section">
+        <h3 class="dialog__subtitle">Ajustes</h3>
+        <p>Cambia la dimensión (de 3 a 8), el tamaño, la forma o el color de las fichas. Cualquier cambio empieza un tablero nuevo.</p>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog class="dialog dialog--compact" aria-labelledby="confirm-title" data-dialog="confirm">
+    <form method="dialog">
+      <h2 class="dialog__title" id="confirm-title">¿Empezar un tablero nuevo?</h2>
+      <p class="dialog__text">Perderás el progreso de la partida actual.</p>
+      <footer class="dialog__actions">
+        <button class="button button--neutral" value="cancel" autofocus>Seguir jugando</button>
+        <button class="button button--primary" value="confirm">Tablero nuevo</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <p class="toast" role="status" data-toast></p>
+  <p class="visually-hidden" aria-live="polite" data-announcer></p>
+</body>
+</html>

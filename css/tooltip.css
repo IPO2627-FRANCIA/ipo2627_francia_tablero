@@ -1,0 +1,44 @@
+/* ==========================================================================
+   Tooltip: ayuda contextual posicionada respecto a su control
+   El control es el contenedor de referencia (relative) y la burbuja se
+   coloca de forma absoluta debajo de él, sin alterar el flujo del layout.
+   ========================================================================== */
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 50%;
+  z-index: var(--z-overlay);
+  translate: -50% calc(-1 * var(--space-1));
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-s);
+  background: var(--neutral-100);
+  color: var(--neutral-950);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    translate var(--duration-fast) var(--ease-out);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+  translate: -50% 0;
+  opacity: 1;
+  transition-delay: 300ms;
+}
+
+/* En pantallas táctiles no hay hover: el tooltip se quedaría pegado */
+@media (hover: none) {
+  [data-tooltip]::after {
+    display: none;
+  }
+}

@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Base: reinicio, valores por defecto del documento y retícula de la página
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+body {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+button,
+input,
+output {
+  font: inherit;
+  color: inherit;
+}
+
+svg {
+  display: block;
+}
+
+kbd {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-s);
+  background: var(--color-slot);
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+}
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Retícula de la página: composición bidimensional (tablero + ajustes) */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--sidebar-width);
+  grid-template-areas: "board settings";
+  align-items: start;
+  gap: var(--space-5);
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-6) var(--space-7);
+}
+
+.layout > .board-panel {
+  grid-area: board;
+}
+
+.layout > .settings {
+  grid-area: settings;
+}
+
+@media (max-width: 60rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "board"
+      "settings";
+    padding-inline: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
