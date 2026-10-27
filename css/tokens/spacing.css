@@ -1,0 +1,44 @@
+/* ==========================================================================
+   Tokens de diseño espacial: escala de 4 px expresada en rem
+   - rem en todo: respeta el tamaño de letra elegido por el usuario.
+   - Proximidad (Gestalt): poco espacio dentro de un grupo, más entre grupos.
+   Incluye también profundidad (sombras, capas) y movimiento.
+   ========================================================================== */
+
+:root {
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-s: 0.5rem;
+  --radius-m: 0.75rem;
+  --radius-l: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Tamaños de ficha (pequeña cumple el mínimo táctil de 44 px) */
+  --tile-s: 3rem;
+  --tile-m: 4rem;
+  --tile-l: 5rem;
+
+  --control-height: 2.75rem;
+  --sidebar-width: 20rem;
+  --content-max: 76rem;
+
+  --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.3), 0 4px 12px oklch(0% 0 0 / 0.18);
+  --shadow-2: 0 8px 32px oklch(0% 0 0 / 0.45);
+
+  --focus-width: 3px;
+  --focus-offset: 2px;
+
+  --z-header: 10;
+  --z-overlay: 20;
+  --z-toast: 30;
+
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

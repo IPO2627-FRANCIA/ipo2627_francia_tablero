@@ -11,7 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap">
 
-  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/tokens/color.css">
+  <link rel="stylesheet" href="css/tokens/typography.css">
+  <link rel="stylesheet" href="css/tokens/spacing.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/card.css">
   <link rel="stylesheet" href="css/buttons.css">
@@ -32,7 +34,7 @@
       <p class="app-header__subtitle">Deja cada fila con fichas iguales</p>
     </div>
 
-    <dl class="stats">
+    <dl class="stats" data-stats>
       <div class="stats__item">
         <dt class="stats__label">Movimientos</dt>
         <dd class="stats__value"><output data-stat="moves">0</output></dd>
@@ -94,39 +96,42 @@
               <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
             </button>
             <label class="visually-hidden" for="dimension">Número de filas y columnas</label>
-            <input class="stepper__input" id="dimension" name="dimension" type="number" min="3" max="8" step="1" inputmode="numeric" value="4">
+            <input class="stepper__input" id="dimension" name="dimension" type="number" step="1" inputmode="numeric" data-setting="dimension">
             <button class="button button--neutral button--icon" type="button" aria-label="Aumentar dimensión" data-step="1" data-tooltip="Una fila más">
               <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             </button>
-            <output class="stepper__preview" for="dimension" data-dimension-preview>4 × 4</output>
+            <output class="stepper__preview" for="dimension" data-dimension-preview></output>
           </div>
         </fieldset>
 
         <fieldset class="settings__group">
           <legend class="settings__legend">Tamaño de las fichas</legend>
-          <div class="segmented">
-            <label class="segmented__option"><input class="segmented__input" type="radio" name="tileSize" value="small">Pequeña</label>
-            <label class="segmented__option"><input class="segmented__input" type="radio" name="tileSize" value="medium">Mediana</label>
-            <label class="segmented__option"><input class="segmented__input" type="radio" name="tileSize" value="large">Grande</label>
-          </div>
+          <div class="segmented" data-options="tileSize" data-option-template="segmented-option"></div>
         </fieldset>
 
         <fieldset class="settings__group">
           <legend class="settings__legend">Forma</legend>
-          <div class="option-grid" data-options="shapeSet"></div>
+          <div class="option-grid" data-options="shapeSet" data-option-template="option-card"></div>
         </fieldset>
 
         <fieldset class="settings__group">
           <legend class="settings__legend">Color</legend>
-          <div class="option-grid option-grid--three" data-options="palette"></div>
+          <div class="option-grid option-grid--three" data-options="palette" data-option-template="option-card"></div>
         </fieldset>
       </form>
     </aside>
   </main>
 
-  <template data-template="theme-option">
+  <template data-template="segmented-option">
+    <label class="segmented__option">
+      <input class="segmented__input" type="radio" data-option-input>
+      <span data-label></span>
+    </label>
+  </template>
+
+  <template data-template="option-card">
     <label class="option-card">
-      <input class="option-card__input" type="radio">
+      <input class="option-card__input" type="radio" data-option-input>
       <span class="option-card__preview" data-preview></span>
       <span class="option-card__label" data-label></span>
     </label>

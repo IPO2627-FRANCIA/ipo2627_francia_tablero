@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Tokens de diseño cromático: esquema triádico sobre neutros oscuros
+   - Tres tonos separados 120° en OKLCH, con la misma luminosidad y croma:
+     ningún tipo de ficha pesa más que otro.
+   - Neutros: rampa azul-gris de croma muy bajo (tono 260) para superficies.
+   - Un único acento, el primer vértice de la tríada, reservado para la
+     acción principal, la selección y el foco.
+   Los componentes solo consumen los roles (--color-*), nunca la paleta base.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Neutros */
+  --neutral-950: oklch(15% 0.014 260);
+  --neutral-900: oklch(19% 0.018 260);
+  --neutral-850: oklch(23% 0.02 260);
+  --neutral-800: oklch(27% 0.022 260);
+  --neutral-700: oklch(35% 0.024 260);
+  --neutral-500: oklch(60% 0.02 260);
+  --neutral-300: oklch(80% 0.012 260);
+  --neutral-100: oklch(96% 0.005 260);
+
+  /* Tríada cálida: 30° · 150° · 270° */
+  --triad-warm-1: oklch(72% 0.16 30);
+  --triad-warm-2: oklch(72% 0.15 150);
+  --triad-warm-3: oklch(72% 0.15 270);
+
+  /* Tríada fresca: la anterior rotada 60° (90° · 210° · 330°) */
+  --triad-cool-1: oklch(80% 0.15 85);
+  --triad-cool-2: oklch(80% 0.12 205);
+  --triad-cool-3: oklch(80% 0.14 330);
+
+  /* Tríada de alto contraste: tonos 95° · 230° · 345° con luminosidades
+     distintas, para distinguirse también en escala de grises */
+  --triad-contrast-1: oklch(90% 0.17 95);
+  --triad-contrast-2: oklch(60% 0.17 245);
+  --triad-contrast-3: oklch(72% 0.19 345);
+
+  /* Roles */
+  --color-bg: var(--neutral-950);
+  --color-bg-translucent: oklch(15% 0.014 260 / 0.82);
+  --color-surface: var(--neutral-900);
+  --color-surface-raised: var(--neutral-850);
+  --color-slot: var(--neutral-800);
+  --color-slot-hover: var(--neutral-700);
+  --color-border: var(--neutral-700);
+  --color-text: var(--neutral-100);
+  --color-text-muted: var(--neutral-300);
+  --color-text-subtle: var(--neutral-500);
+  --color-inverse-bg: var(--neutral-100);
+  --color-inverse-text: var(--neutral-950);
+
+  --color-accent: var(--triad-warm-1);
+  --color-accent-hover: oklch(78% 0.16 30);
+  --color-accent-soft: oklch(72% 0.16 30 / 0.16);
+  --color-on-accent: var(--neutral-950);
+  --color-success: var(--triad-warm-2);
+  --color-success-soft: oklch(72% 0.15 150 / 0.14);
+  --color-focus: var(--color-accent);
+  --color-scrim: oklch(15% 0.014 260 / 0.8);
+  --color-piece-highlight: oklch(100% 0 0 / 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Paletas de fichas: un color por tipo (0, 1, 2). Se aplican con
+   data-palette en cualquier ancestro; la más cercana manda. Para añadir una
+   paleta: un bloque aquí y su entrada en js/config/appearance.js.
+   -------------------------------------------------------------------------- */
+[data-palette="warm"] {
+  --piece-0: var(--triad-warm-1);
+  --piece-1: var(--triad-warm-2);
+  --piece-2: var(--triad-warm-3);
+}
+
+[data-palette="cool"] {
+  --piece-0: var(--triad-cool-1);
+  --piece-1: var(--triad-cool-2);
+  --piece-2: var(--triad-cool-3);
+}
+
+[data-palette="contrast"] {
+  --piece-0: var(--triad-contrast-1);
+  --piece-1: var(--triad-contrast-2);
+  --piece-2: var(--triad-contrast-3);
+}

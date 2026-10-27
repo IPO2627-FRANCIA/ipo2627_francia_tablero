@@ -1,34 +1,44 @@
-import { TILE_SIZES, SHAPE_SETS, PALETTES } from '../config/themes.js';
+import { TILE_SIZES, SHAPE_SETS, PALETTES } from '../config/appearance.js';
 
-const STORAGE_KEY = 'tablero.settings';
+const DIMENSION = Object.freeze({ min: 3, max: 8 });
+
+/** Devuelve el valor si es una de las opciones, si no undefined. */
+const oneOf = (options) => (value) => (Object.hasOwn(options, value) ? value : undefined);
+
+function clampDimension(value) {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n)) return undefined;
+  return Math.min(DIMENSION.max, Math.max(DIMENSION.min, n));
+}
 
 /**
  * Configuración de la partida. Inmutable: cada cambio crea una instancia
  * nueva ya validada, así el resto del código nunca ve valores inválidos.
  */
 export class Settings {
-  static MIN_DIMENSION = 3;
-  static MAX_DIMENSION = 8;
-  static DEFAULTS = Object.freeze({
-    dimension: 4,
-    tileSize: 'medium',
-    shapeSet: 'basic',
-    palette: 'warm',
+  static DIMENSION = DIMENSION;
+
+  /**
+   * Única definición de los ajustes: valor por defecto y cómo normalizar lo
+   * que llegue. Añadir un ajuste empieza por añadir una entrada aquí.
+   */
+  static SCHEMA = Object.freeze({
+    dimension: { fallback: 4, normalize: clampDimension },
+    tileSize: { fallback: 'medium', normalize: oneOf(TILE_SIZES) },
+    shapeSet: { fallback: 'basic', normalize: oneOf(SHAPE_SETS) },
+    palette: { fallback: 'warm', normalize: oneOf(PALETTES) },
   });
 
   constructor(values = {}) {
-    const { dimension, tileSize, shapeSet, palette } = { ...Settings.DEFAULTS, ...values };
-    this.dimension = Settings.clampDimension(dimension);
-    this.tileSize = TILE_SIZES.includes(tileSize) ? tileSize : Settings.DEFAULTS.tileSize;
-    this.shapeSet = Object.hasOwn(SHAPE_SETS, shapeSet) ? shapeSet : Settings.DEFAULTS.shapeSet;
-    this.palette = Object.hasOwn(PALETTES, palette) ? palette : Settings.DEFAULTS.palette;
+    for (const [key, { fallback, normalize }] of Object.entries(Settings.SCHEMA)) {
+      this[key] = normalize(values[key] ?? fallback) ?? fallback;
+    }
     Object.freeze(this);
   }
 
-  static clampDimension(value) {
-    const n = Math.round(Number(value));
-    if (!Number.isFinite(n)) return Settings.DEFAULTS.dimension;
-    return Math.min(Settings.MAX_DIMENSION, Math.max(Settings.MIN_DIMENSION, n));
+  /** true si la dimensión pedida es válida tal cual, sin recortarla. */
+  static isInRange(dimension) {
+    return clampDimension(dimension) === Number(dimension);
   }
 
   with(changes) {
@@ -36,22 +46,6 @@ export class Settings {
   }
 
   equals(other) {
-    return Object.keys(Settings.DEFAULTS).every((key) => this[key] === other[key]);
-  }
-
-  static load() {
-    try {
-      return new Settings(JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? {});
-    } catch {
-      return new Settings();
-    }
-  }
-
-  save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this));
-    } catch {
-      // Sin almacenamiento disponible (modo privado): las preferencias no persisten.
-    }
+    return Object.keys(Settings.SCHEMA).every((key) => this[key] === other[key]);
   }
 }

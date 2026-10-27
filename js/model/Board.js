@@ -68,6 +68,12 @@ export class Board {
     return index % this.#size;
   }
 
+  /** Casilla vecina en la dirección dada, sin salir del tablero. */
+  neighbour(index, dRow, dCol) {
+    const clamp = (value) => Math.min(this.#size - 1, Math.max(0, value));
+    return clamp(this.rowOf(index) + dRow) * this.#size + clamp(this.colOf(index) + dCol);
+  }
+
   #row(row) {
     return this.#tiles.slice(row * this.#size, (row + 1) * this.#size);
   }
@@ -96,6 +102,11 @@ export class Board {
 
   isSolved() {
     return Board.#isSolved(this.#tiles, this.#size);
+  }
+
+  /** Hay progreso que se perdería al abandonar la partida. */
+  hasProgress() {
+    return this.#moves > 0 && !this.isSolved();
   }
 
   #isValidIndex(index) {
