@@ -1,42 +1,33 @@
 /* ==========================================================================
    Pieza: la figura de una ficha (forma + color)
    Se reutiliza en el tablero, en las vistas previas de ajustes y en la ayuda.
-   - El color depende del tipo (data-type) y de la paleta activa (data-palette
-     en cualquier ancestro; la más cercana manda).
+   - El color depende del tipo (data-type) y de la paleta activa: los
+     colores --piece-0..2 se definen por paleta en css/tokens/color.css.
    - La forma depende de data-shape.
    ========================================================================== */
-
-[data-palette="warm"] {
-  --piece-0: var(--triad-warm-1);
-  --piece-1: var(--triad-warm-2);
-  --piece-2: var(--triad-warm-3);
-}
-
-[data-palette="cool"] {
-  --piece-0: var(--triad-cool-1);
-  --piece-1: var(--triad-cool-2);
-  --piece-2: var(--triad-cool-3);
-}
-
-[data-palette="contrast"] {
-  --piece-0: var(--triad-contrast-1);
-  --piece-1: var(--triad-contrast-2);
-  --piece-2: var(--triad-contrast-3);
-}
 
 .piece {
   display: block;
   width: 72%;
   aspect-ratio: 1;
-  background:
-    radial-gradient(circle at 32% 28%, oklch(100% 0 0 / 0.35), transparent 55%),
+  background: radial-gradient(
+      circle at 32% 28%,
+      var(--color-piece-highlight),
+      transparent 55%
+    ),
     var(--piece-color);
   transition: transform var(--duration-fast) var(--ease-out);
 }
 
-.piece[data-type="0"] { --piece-color: var(--piece-0); }
-.piece[data-type="1"] { --piece-color: var(--piece-1); }
-.piece[data-type="2"] { --piece-color: var(--piece-2); }
+.piece[data-type="0"] {
+  --piece-color: var(--piece-0);
+}
+.piece[data-type="1"] {
+  --piece-color: var(--piece-1);
+}
+.piece[data-type="2"] {
+  --piece-color: var(--piece-2);
+}
 
 /* Formas */
 .piece[data-shape="circle"] {
@@ -62,5 +53,16 @@
 
 .piece[data-shape="star"] {
   width: 80%;
-  clip-path: polygon(50% 2%, 61% 36%, 97% 36%, 68% 57%, 79% 92%, 50% 71%, 21% 92%, 32% 57%, 3% 36%, 39% 36%);
+  clip-path: polygon(
+    50% 2%,
+    61% 36%,
+    97% 36%,
+    68% 57%,
+    79% 92%,
+    50% 71%,
+    21% 92%,
+    32% 57%,
+    3% 36%,
+    39% 36%
+  );
 }

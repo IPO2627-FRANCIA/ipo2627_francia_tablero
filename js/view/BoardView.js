@@ -1,20 +1,33 @@
-import { SHAPE_SETS, SHAPE_NAMES, PALETTES } from '../config/themes.js';
+import { SHAPE_SETS, SHAPE_NAMES, PALETTES } from '../config/appearance.js';
+import { messages } from './messages.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
+const DRAG_TYPE = 'text/plain';
+
+const ARROW_STEPS = {
+  ArrowUp: [-1, 0],
+  ArrowDown: [1, 0],
+  ArrowLeft: [0, -1],
+  ArrowRight: [0, 1],
+};
+
 /**
  * Pinta el tablero y refleja su estado visual (selección, arrastre, pistas).
- * No toma decisiones de juego: el controlador le dice qué mostrar.
+ * Traduce los eventos del DOM (clic, teclado, Drag & Drop) en intenciones
+ * —seleccionar, intercambiar, cancelar— sin tomar decisiones de juego.
  */
 export class BoardView {
   #root;
   #grid;
   #rowStatus;
+  #board = null;
   #cells = [];
   #badges = [];
-  #size = 0;
   #shapes = [];
   #colors = [];
+  #dragSource = null;
+  #handlers = { select() {}, swap() {}, cancel() {}, dragStart() {} };
 
   constructor(root) {
     this.#root = root;
@@ -23,21 +36,51 @@ export class BoardView {
 
     // Roving tabindex: solo la celda activa entra en el orden de tabulación
     this.#grid.addEventListener('focusin', (event) => {
-      const index = this.indexFrom(event.target);
+      const index = this.#indexFrom(event.target);
       if (index !== null) this.#setActiveCell(index);
     });
+
+    this.#grid.addEventListener('click', (event) => {
+      const index = this.#indexFrom(event.target);
+      if (index !== null) this.#handlers.select(index);
+    });
+    this.#grid.addEventListener('keydown', (event) => this.#onKeyDown(event));
+
+    this.#grid.addEventListener('dragstart', (event) => this.#onDragStart(event));
+    this.#grid.addEventListener('dragover', (event) => this.#onDragOver(event));
+    this.#grid.addEventListener('dragleave', (event) => this.#onDragLeave(event));
+    this.#grid.addEventListener('drop', (event) => this.#onDrop(event));
+    this.#grid.addEventListener('dragend', () => this.#endDrag());
   }
 
-  get grid() {
-    return this.#grid;
+  // --- Intenciones del usuario ---------------------------------------------
+
+  /** Clic, Intro o Espacio sobre una ficha. */
+  onSelect(handler) {
+    this.#handlers.select = handler;
   }
+
+  /** Ficha soltada sobre otra. */
+  onSwap(handler) {
+    this.#handlers.swap = handler;
+  }
+
+  /** Esc. */
+  onCancel(handler) {
+    this.#handlers.cancel = handler;
+  }
+
+  onDragStart(handler) {
+    this.#handlers.dragStart = handler;
+  }
+
+  // --- Pintado -------------------------------------------------------------
 
   render(board, settings) {
-    this.#size = board.size;
+    this.#board = board;
     this.#shapes = SHAPE_SETS[settings.shapeSet].shapes;
     this.#colors = PALETTES[settings.palette].colors;
 
-    document.documentElement.dataset.palette = settings.palette;
     this.#root.dataset.tileSize = settings.tileSize;
     this.#root.style.setProperty('--n', board.size);
     this.setLocked(false);
@@ -47,7 +90,7 @@ export class BoardView {
       const rowElement = document.createElement('div');
       rowElement.className = 'board__row';
       rowElement.setAttribute('role', 'row');
-      rowElement.append(...this.#cells.slice(row * board.size, (row + 1) * board.size));
+      rowElement.append(...this.#rowCells(row));
       return rowElement;
     });
     this.#grid.replaceChildren(...rows);
@@ -59,8 +102,8 @@ export class BoardView {
     });
     this.#rowStatus.replaceChildren(...this.#badges);
 
-    this.#cells.forEach((_, index) => this.#paint(board, index));
-    this.updateRows(board);
+    this.#cells.forEach((_, index) => this.#paint(index));
+    this.updateRows();
     this.#setActiveCell(0);
   }
 
@@ -80,37 +123,39 @@ export class BoardView {
     return cell;
   }
 
-  #paint(board, index) {
-    const type = board.typeAt(index);
-    const shape = this.#shapes[type];
+  #rowCells(row) {
+    const size = this.#board.size;
+    return this.#cells.slice(row * size, (row + 1) * size);
+  }
+
+  #paint(index) {
+    const type = this.#board.typeAt(index);
     const cell = this.#cells[index];
     const piece = cell.firstElementChild;
 
     piece.dataset.type = type;
-    piece.dataset.shape = shape;
-    cell.setAttribute('aria-label', `${this.positionLabel(index)}: ${SHAPE_NAMES[shape]} ${this.#colors[type]}`);
+    piece.dataset.shape = this.#shapes[type];
+    cell.setAttribute('aria-label', messages.cell(this.positionLabel(index), this.pieceLabel(index)));
   }
 
   positionLabel(index) {
-    const row = Math.floor(index / this.#size) + 1;
-    const col = (index % this.#size) + 1;
-    return `Fila ${row}, columna ${col}`;
+    return messages.position(this.#board.rowOf(index) + 1, this.#board.colOf(index) + 1);
   }
 
-  pieceLabel(board, index) {
-    const type = board.typeAt(index);
-    return `${SHAPE_NAMES[this.#shapes[type]]} ${this.#colors[type]}`;
+  pieceLabel(index) {
+    const type = this.#board.typeAt(index);
+    return messages.piece(SHAPE_NAMES[this.#shapes[type]], this.#colors[type]);
   }
 
-  indexFrom(target) {
+  #indexFrom(target) {
     const cell = target instanceof Element ? target.closest('[data-cell]') : null;
     return cell && this.#grid.contains(cell) ? Number(cell.dataset.index) : null;
   }
 
   /** Repinta las dos celdas y desliza cada pieza desde la posición de la otra. */
-  showSwap(board, a, b) {
-    this.#paint(board, a);
-    this.#paint(board, b);
+  showSwap(a, b) {
+    this.#paint(a);
+    this.#paint(b);
     if (reducedMotion.matches) return;
 
     const from = this.#cells[a].getBoundingClientRect();
@@ -131,31 +176,31 @@ export class BoardView {
     animation.finished.finally(() => delete cell.dataset.moving).catch(() => {});
   }
 
-  updateRows(board) {
+  updateRows() {
+    const board = this.#board;
     for (let row = 0; row < board.size; row++) {
       const complete = board.isRowComplete(row);
       const badge = this.#badges[row];
       badge.toggleAttribute('data-complete', complete);
-      badge.textContent = complete ? '✓' : `${board.rowProgress(row)}/${board.size}`;
-
-      this.#cells
-        .slice(row * board.size, (row + 1) * board.size)
-        .forEach((cell) => cell.toggleAttribute('data-row-complete', complete));
+      badge.textContent = complete ? '✓' : messages.rows(board.rowProgress(row), board.size);
+      this.#rowCells(row).forEach((cell) => cell.toggleAttribute('data-row-complete', complete));
     }
   }
+
+  // --- Estados visuales ----------------------------------------------------
 
   markSelected(index) {
     this.#cells.forEach((cell, i) => cell.setAttribute('aria-selected', String(i === index)));
   }
 
-  markDragging(index) {
+  #markDragging(index) {
     // Se aplica en el siguiente frame para no afectar a la imagen de arrastre
     requestAnimationFrame(() => {
       this.#cells.forEach((cell, i) => cell.toggleAttribute('data-dragging', i === index));
     });
   }
 
-  markDropTarget(index) {
+  #markDropTarget(index) {
     this.#cells.forEach((cell, i) => cell.toggleAttribute('data-drop-target', i === index));
   }
 
@@ -181,12 +226,69 @@ export class BoardView {
     this.#cells.forEach((cell) => (cell.draggable = !locked));
   }
 
-  focusCell(index) {
-    this.#setActiveCell(index);
-    this.#cells[index].focus();
-  }
-
   #setActiveCell(index) {
     this.#cells.forEach((cell, i) => (cell.tabIndex = i === index ? 0 : -1));
+  }
+
+  // --- Teclado -------------------------------------------------------------
+
+  #onKeyDown(event) {
+    const index = this.#indexFrom(event.target);
+    if (index === null) return;
+
+    if (event.key in ARROW_STEPS) {
+      event.preventDefault();
+      const next = this.#board.neighbour(index, ...ARROW_STEPS[event.key]);
+      this.#setActiveCell(next);
+      this.#cells[next].focus();
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.#handlers.select(index);
+    } else if (event.key === 'Escape') {
+      this.#handlers.cancel();
+    }
+  }
+
+  // --- Drag & Drop ---------------------------------------------------------
+
+  #onDragStart(event) {
+    const index = this.#indexFrom(event.target);
+    if (index === null) {
+      event.preventDefault();
+      return;
+    }
+    this.#dragSource = index;
+    event.dataTransfer.setData(DRAG_TYPE, String(index));
+    event.dataTransfer.effectAllowed = 'move';
+    this.#markDragging(index);
+    this.#handlers.dragStart(index);
+  }
+
+  #onDragOver(event) {
+    const index = this.#indexFrom(event.target);
+    if (index === null || this.#dragSource === null || !event.dataTransfer.types.includes(DRAG_TYPE)) return;
+
+    event.preventDefault(); // permite soltar aquí
+    const isSelf = index === this.#dragSource;
+    event.dataTransfer.dropEffect = isSelf ? 'none' : 'move';
+    this.#markDropTarget(isSelf ? null : index);
+  }
+
+  #onDragLeave(event) {
+    if (!this.#grid.contains(event.relatedTarget)) this.#markDropTarget(null);
+  }
+
+  #onDrop(event) {
+    event.preventDefault();
+    const from = Number.parseInt(event.dataTransfer.getData(DRAG_TYPE), 10);
+    const to = this.#indexFrom(event.target);
+    this.#endDrag();
+    if (Number.isInteger(from) && to !== null && from !== to) this.#handlers.swap(from, to);
+  }
+
+  #endDrag() {
+    this.#dragSource = null;
+    this.#markDragging(null);
+    this.#markDropTarget(null);
   }
 }

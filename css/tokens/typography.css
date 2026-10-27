@@ -1,0 +1,27 @@
+/* ==========================================================================
+   Tokens de diseño tipográfico: dos fuentes contrastadas
+   - Fraunces (serifa de display) para títulos y cifras: carácter y jerarquía.
+   - Inter (sans humanista) para texto e interfaz: legibilidad a tamaño pequeño.
+   - Escala modular de tercera mayor (×1.25) definida una sola vez.
+   ========================================================================== */
+
+:root {
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --text-caption: 0.8rem;
+  --text-body: 1rem;
+  --text-lead: 1.25rem;
+  --text-title: 1.563rem;
+  --text-display: 2.441rem;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.15;
+  --leading-body: 1.55;
+
+  --tracking-caps: 0.08em;
+}
